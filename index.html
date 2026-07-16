@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Pause">
+<meta name="theme-color" content="#F7F3EC">
+<title>Pause</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F7F3EC; --ink:#241B2E; --muted:#6E6577;
+    --amber:#C4791F; --amber-soft:#F3E3CB;
+    --sage:#3C7D6E; --sage-soft:#DCEBE4;
+    --clay:#9C6B4A; --clay-soft:#EDE1D7;
+    --food:#2F7D9C; --food-soft:#D7E8EF;
+    --line:#E4DBCF; --card:#FFFFFFcc;
+    --shadow:0 1px 2px rgba(36,27,46,.05), 0 8px 24px rgba(36,27,46,.06);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0}
+  body{
+    background:radial-gradient(120% 60% at 100% 0%, #F1E9DA 0%, rgba(241,233,218,0) 55%), var(--paper);
+    color:var(--ink); font-family:'Inter',system-ui,-apple-system,sans-serif;
+    min-height:100dvh; padding:max(22px,env(safe-area-inset-top)) 18px 40px; max-width:460px; margin:0 auto;
+    -webkit-font-smoothing:antialiased;
+  }
+  .eyebrow{font-size:11px; letter-spacing:.26em; text-transform:uppercase; color:var(--muted); font-weight:600}
+  h1{font-family:'Fraunces',serif; font-weight:500; font-size:30px; line-height:1.05; margin:4px 0 2px; letter-spacing:-.01em}
+  .sub{color:var(--muted); font-size:13.5px; margin:0 0 18px}
+
+  /* always-on dashboard */
+  .dash{background:var(--card); border:1px solid var(--line); border-radius:20px; padding:18px; margin:0 0 18px; box-shadow:var(--shadow)}
+  .dash .potrow{display:flex; justify-content:space-between; align-items:baseline}
+  .dash .potrow .lab{font-size:12.5px; color:var(--muted); font-weight:600}
+  .dash .potrow .val{font-family:'Fraunces',serif; font-size:30px; font-weight:600; letter-spacing:-.02em}
+  .dash .val.low{color:var(--clay)}
+  .bar{height:9px; border-radius:99px; background:#EDE6DA; margin:11px 0 8px; overflow:hidden; display:flex}
+  .bar>span{display:block; height:100%; transition:width .5s cubic-bezier(.2,.8,.2,1)}
+  .bar .seg-shop{background:linear-gradient(90deg,var(--clay),#C08457)}
+  .bar .seg-food{background:linear-gradient(90deg,var(--food),#4FA3C4)}
+  .splitline{display:flex; justify-content:space-between; font-size:11.5px; color:var(--muted)}
+  .splitline .s{color:var(--clay); font-weight:600}
+  .splitline .f{color:var(--food); font-weight:600}
+  .dash .banked{margin-top:14px; padding-top:13px; border-top:1px dashed var(--line); display:flex; justify-content:space-between; align-items:baseline}
+  .dash .banked .lab{font-size:12.5px; color:var(--muted); font-weight:600}
+  .dash .banked .lab b{color:var(--sage)}
+  .dash .banked .val{font-family:'Fraunces',serif; font-size:24px; font-weight:600; color:var(--sage)}
+  .dash .weekwin{font-size:11.5px; color:var(--muted); margin-top:3px; text-align:right}
+
+  .field{margin:0 0 12px}
+  .field label{display:block; font-size:12.5px; color:var(--muted); font-weight:600; margin:0 0 8px}
+  .euro-wrap{position:relative; display:flex; align-items:center; background:#fff; border:1px solid var(--line); border-radius:16px; padding:10px 16px; box-shadow:var(--shadow)}
+  .euro-wrap:focus-within{border-color:var(--amber); box-shadow:0 0 0 3px var(--amber-soft)}
+  .euro-sign{font-family:'Fraunces',serif; font-size:32px; color:var(--muted); margin-right:6px}
+  #price{border:0; outline:0; background:transparent; font-family:'Fraunces',serif; font-weight:500; font-size:40px; width:100%; color:var(--ink); letter-spacing:-.02em}
+  #price::placeholder{color:#D5CDBF}
+
+  .cat-toggle{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:0 0 14px}
+  .cat-btn{display:flex; align-items:center; justify-content:center; gap:7px; padding:11px; border-radius:13px; border:1px solid var(--line); background:#fff; font-family:inherit; font-size:14px; font-weight:600; color:var(--muted); cursor:pointer; transition:all .15s}
+  .cat-btn .ic{font-size:15px}
+  .cat-btn.active[data-cat="shopping"]{background:var(--clay-soft); border-color:var(--clay); color:var(--clay)}
+  .cat-btn.active[data-cat="food"]{background:var(--food-soft); border-color:var(--food); color:var(--food)}
+
+  .verdict{border-radius:20px; padding:20px; margin:2px 0 16px; background:var(--card); border:1px solid var(--line); box-shadow:var(--shadow); backdrop-filter:blur(6px)}
+  .verdict.empty{display:flex; gap:12px; align-items:center; color:var(--muted); font-size:14px}
+  .verdict.empty .dot{width:26px;height:26px;border-radius:50%;flex:0 0 auto; background:conic-gradient(from 210deg, var(--amber), var(--sage), var(--food), var(--amber))}
+  .cost-hours{font-family:'Fraunces',serif; font-size:32px; font-weight:500; letter-spacing:-.02em; line-height:1.05}
+  .cost-hours b{color:var(--amber); font-weight:600}
+  .cost-cap{font-size:13px; color:var(--muted); margin-top:6px; line-height:1.45}
+  .after{margin-top:13px; padding-top:12px; border-top:1px dashed var(--line); font-size:13px; color:var(--muted)}
+  .after b{color:var(--ink)}
+
+  .actions{display:grid; grid-template-columns:1fr 1fr; gap:11px; margin:2px 0 20px}
+  button.act{font-family:inherit; font-weight:600; font-size:15px; border:0; border-radius:15px; padding:16px 12px; cursor:pointer; transition:transform .08s ease; line-height:1.25}
+  button.act:active{transform:scale(.97)}
+  .btn-stay{background:var(--sage); color:#fff}
+  .btn-stay:disabled{background:var(--sage-soft); color:#9DBFB4; cursor:default}
+  .btn-buy{background:#fff; color:var(--clay); border:1px solid var(--clay-soft)}
+  .btn-buy:disabled{opacity:.5; cursor:default}
+  .btn-sub{display:block; font-size:11.5px; font-weight:500; opacity:.85; margin-top:2px}
+
+  .goal-line{text-align:center; font-size:13px; color:var(--muted); margin:2px 0 18px; line-height:1.5}
+  .goal-line b{color:var(--ink); font-weight:600}
+
+  details{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:2px 16px; box-shadow:var(--shadow)}
+  summary{list-style:none; cursor:pointer; padding:13px 0; font-size:13px; font-weight:600; color:var(--muted); display:flex; justify-content:space-between; align-items:center}
+  summary::-webkit-details-marker{display:none}
+  summary .chev{transition:transform .2s}
+  details[open] summary .chev{transform:rotate(180deg)}
+  .set-grid{padding:4px 0 16px; display:grid; gap:13px}
+  .set-grid label{font-size:12.5px; color:var(--muted); font-weight:600; display:block; margin-bottom:6px}
+  .set-grid input{width:100%; font-family:inherit; font-size:15px; padding:11px 13px; border:1px solid var(--line); border-radius:11px; background:#fff; color:var(--ink)}
+  .set-grid input:focus{outline:0; border-color:var(--amber); box-shadow:0 0 0 3px var(--amber-soft)}
+  .undo{margin-top:2px; background:#fff; color:var(--muted); font-size:13px; font-weight:600; padding:11px; border-radius:11px; border:1px solid var(--line); cursor:pointer}
+  .reset{background:var(--sage-soft); color:var(--sage); font-size:13px; font-weight:600; padding:12px; border-radius:11px; border:0; cursor:pointer}
+  .reset.week{background:var(--sage); color:#fff}
+  .reset.danger{background:#fff; color:#B4534B; border:1px solid #E7C9C6}
+  .hint{font-size:11.5px; color:var(--muted); margin-top:-4px; line-height:1.4}
+
+  .toast{position:fixed; left:50%; bottom:26px; transform:translateX(-50%) translateY(20px); opacity:0; background:var(--ink); color:#fff; padding:13px 20px; border-radius:14px; font-size:14px; font-weight:500; box-shadow:0 10px 30px rgba(36,27,46,.25); transition:opacity .3s, transform .3s; pointer-events:none; max-width:88vw; text-align:center}
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+  <div class="eyebrow">Before you tap</div>
+  <h1>Pause.</h1>
+  <p class="sub">Nice coffee, or the 41st t-shirt? Same pot. You choose.</p>
+
+  <!-- ALWAYS-ON DASHBOARD -->
+  <div class="dash">
+    <div class="potrow">
+      <span class="lab">Left in this week's pot</span>
+      <span class="val" id="dLeft">€270</span>
+    </div>
+    <div class="bar"><span class="seg-shop" id="dBarShop" style="width:0%"></span><span class="seg-food" id="dBarFood" style="width:0%"></span></div>
+    <div class="splitline"><span class="s" id="dShop">🛍️ €0 shopping</span><span class="f" id="dFood">☕ €0 food</span></div>
+    <div class="banked">
+      <span class="lab">💚 Banked all-time <b id="dGoalName"></b></span>
+      <span class="val" id="dResAll">€0</span>
+    </div>
+    <div class="weekwin" id="dResWeek">Resisted €0 this week</div>
+  </div>
+
+  <div class="field">
+    <label for="price">Thinking about buying something? Price on the tag</label>
+    <div class="euro-wrap">
+      <span class="euro-sign">€</span>
+      <input id="price" type="number" inputmode="decimal" placeholder="0" min="0" step="1" autocomplete="off">
+    </div>
+  </div>
+
+  <div class="cat-toggle">
+    <button class="cat-btn active" data-cat="shopping" id="catShop"><span class="ic">🛍️</span> Shopping</button>
+    <button class="cat-btn" data-cat="food" id="catFood"><span class="ic">☕</span> Food</button>
+  </div>
+
+  <div id="verdict" class="verdict empty">
+    <span class="dot"></span>
+    <span>Type a price above to see it in hours of your life — then decide.</span>
+  </div>
+
+  <div class="actions">
+    <button class="act btn-stay" id="stay" disabled>I walked away<span class="btn-sub">bank the win</span></button>
+    <button class="act btn-buy" id="buy" disabled>I bought it<span class="btn-sub">log it, no drama</span></button>
+  </div>
+
+  <p class="goal-line" id="goalLine"></p>
+
+  <details>
+    <summary>Settings <span class="chev">⌄</span></summary>
+    <div class="set-grid">
+      <div><label for="setBudget">Weekly pot (€)</label><input id="setBudget" type="number" inputmode="decimal" min="0"></div>
+      <div><label for="setHourly">What an hour of your time is worth (€)</label><input id="setHourly" type="number" inputmode="decimal" min="1"></div>
+      <div><label for="setGoal">What the resisted money is really for</label><input id="setGoal" type="text" maxlength="40" placeholder="the next Safari"></div>
+      <button class="undo" id="undo">↩︎ Undo last entry</button>
+      <button class="reset week" id="resetWeek">Start a new week (reset the pot)</button>
+      <p class="hint">Do this every week when you top up Wise. Clears the pot and the food/shopping split — your all-time banked total keeps growing.</p>
+      <button class="reset danger" id="resetAll">Reset everything (incl. all-time)</button>
+    </div>
+  </details>
+
+  <div class="toast" id="toast"></div>
+<script>
+// ---- Robust save: try localStorage; if unavailable, keep in-memory so it still works this session ----
+var mem = {};
+var LSok = (function(){ try{ var k='__t'; window.localStorage.setItem(k,'1'); window.localStorage.removeItem(k); return true; }catch(e){ return false; } })();
+function load(k,d){
+  try{ if(LSok){ var v=window.localStorage.getItem(k); return v==null?d:JSON.parse(v); } }catch(e){}
+  return (k in mem)? mem[k] : d;
+}
+function save(k,v){
+  mem[k]=v;
+  try{ if(LSok){ window.localStorage.setItem(k, JSON.stringify(v)); } }catch(e){}
+}
+function eur(n){ return '€'+Math.round(n).toLocaleString('es-ES'); }
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+
+var cfg = load('pausev3_cfg', {budget:270, hourly:53, goal:'the next Safari'});
+var led = load('pausev3_led', {spentShop:0, spentFood:0, resWeek:0, resAll:0});
+var lastEntry = load('pausev3_last', null); // for undo: {type:'buy'|'stay', cat, amount}
+
+var $=function(id){return document.getElementById(id);};
+var priceEl=$('price'), verdictEl=$('verdict'), stayBtn=$('stay'), buyBtn=$('buy');
+$('setBudget').value=cfg.budget; $('setHourly').value=cfg.hourly; $('setGoal').value=cfg.goal;
+
+var curCat='shopping';
+function setCat(c){ curCat=c; $('catShop').classList.toggle('active',c==='shopping'); $('catFood').classList.toggle('active',c==='food'); render(); }
+$('catShop').addEventListener('click',function(){setCat('shopping');});
+$('catFood').addEventListener('click',function(){setCat('food');});
+
+function price(){ var v=parseFloat(priceEl.value); return (isNaN(v)||v<0)?0:v; }
+
+function renderDash(){
+  var spent=led.spentShop+led.spentFood;
+  var left=cfg.budget-spent;
+  var dl=$('dLeft'); dl.textContent=eur(left); dl.className='val'+(left<=cfg.budget*0.25?' low':'');
+  var b=cfg.budget||1;
+  $('dBarShop').style.width=Math.max(0,Math.min(100,led.spentShop/b*100))+'%';
+  $('dBarFood').style.width=Math.max(0,Math.min(100,led.spentFood/b*100))+'%';
+  $('dShop').textContent='🛍️ '+eur(led.spentShop)+' shopping';
+  $('dFood').textContent='☕ '+eur(led.spentFood)+' food';
+  $('dResAll').textContent=eur(led.resAll);
+  $('dGoalName').textContent = cfg.goal ? '· '+cfg.goal : '';
+  $('dResWeek').textContent='Resisted '+eur(led.resWeek)+' this week';
+}
+
+function render(){
+  renderDash();
+  var spent=led.spentShop+led.spentFood, left=cfg.budget-spent;
+  $('goalLine').innerHTML = led.resAll>0
+    ? "You've banked <b>"+eur(led.resAll)+"</b> toward <b>"+esc(cfg.goal)+"</b>. Keep going."
+    : "Every walk-away goes toward <b>"+esc(cfg.goal)+"</b>.";
+  var p=price();
+  if(p<=0){
+    verdictEl.className='verdict empty';
+    verdictEl.innerHTML='<span class="dot"></span><span>Type a price above to see it in hours of your life — then decide.</span>';
+    stayBtn.disabled=true; buyBtn.disabled=true; return;
+  }
+  stayBtn.disabled=false; buyBtn.disabled=false;
+  var hours=p/cfg.hourly;
+  var hoursTxt = hours>=8 ? (hours/8).toFixed(hours/8>=10?0:1)+' full work-days'
+                          : hours.toFixed(hours>=3?0:1)+' hour'+(hours>=1.5?'s':'');
+  var leftAfter=left-p;
+  var catWord=curCat==='food'?'food':'shopping';
+  verdictEl.className='verdict';
+  verdictEl.innerHTML=
+    '<div class="cost-hours">≈ <b>'+hoursTxt+'</b> of your life</div>'+
+    '<div class="cost-cap">At €'+cfg.hourly+'/hour, that\u2019s what '+eur(p)+' of '+catWord+' costs in time you can\u2019t buy back.</div>'+
+    '<div class="after">'+(leftAfter>=0
+       ? 'Buy it and <b>'+eur(leftAfter)+'</b> is left for the week. Walk away and you bank <b>'+eur(p)+'</b>.'
+       : 'This blows the week by <b>'+eur(-leftAfter)+'</b>. Walking away banks <b>'+eur(p)+'</b>.')+'</div>';
+}
+
+var toastT;
+function toast(m){var t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove('show');},2800);}
+var cheers=['Banked. That was yours to keep.','Nice. Future-you says thanks.','Walked away — that\u2019s the whole game.','That\u2019s a win you can see.','The 41st t-shirt lost. Good.'];
+
+priceEl.addEventListener('input', render);
+
+stayBtn.addEventListener('click',function(){
+  var p=price(); if(p<=0)return;
+  led.resWeek+=p; led.resAll+=p; save('pausev3_led',led);
+  lastEntry={type:'stay',cat:curCat,amount:p}; save('pausev3_last',lastEntry);
+  priceEl.value=''; render();
+  toast(cheers[Math.floor(Math.random()*cheers.length)]+' +'+eur(p));
+});
+buyBtn.addEventListener('click',function(){
+  var p=price(); if(p<=0)return;
+  if(curCat==='food') led.spentFood+=p; else led.spentShop+=p;
+  save('pausev3_led',led);
+  lastEntry={type:'buy',cat:curCat,amount:p}; save('pausev3_last',lastEntry);
+  priceEl.value=''; render();
+  toast('Logged to '+(curCat==='food'?'☕ food':'🛍️ shopping')+'. No drama.');
+});
+
+$('undo').addEventListener('click',function(){
+  if(!lastEntry){ toast('Nothing to undo.'); return; }
+  var e=lastEntry;
+  if(e.type==='stay'){ led.resWeek=Math.max(0,led.resWeek-e.amount); led.resAll=Math.max(0,led.resAll-e.amount); }
+  else { if(e.cat==='food') led.spentFood=Math.max(0,led.spentFood-e.amount); else led.spentShop=Math.max(0,led.spentShop-e.amount); }
+  save('pausev3_led',led); lastEntry=null; save('pausev3_last',null); render(); toast('Last entry undone.');
+});
+
+$('setBudget').addEventListener('change',function(e){cfg.budget=Math.max(0,parseFloat(e.target.value)||0);save('pausev3_cfg',cfg);render();});
+$('setHourly').addEventListener('change',function(e){cfg.hourly=Math.max(1,parseFloat(e.target.value)||1);save('pausev3_cfg',cfg);render();});
+$('setGoal').addEventListener('change',function(e){cfg.goal=(e.target.value||'your goal').trim();save('pausev3_cfg',cfg);render();});
+$('resetWeek').addEventListener('click',function(){led.spentShop=0;led.spentFood=0;led.resWeek=0;save('pausev3_led',led);render();toast('New week. Pot back to '+eur(cfg.budget)+'.');});
+$('resetAll').addEventListener('click',function(){led={spentShop:0,spentFood:0,resWeek:0,resAll:0};save('pausev3_led',led);lastEntry=null;save('pausev3_last',null);render();toast('Everything reset.');});
+
+render();
+</script>
+</body>
+</html>
